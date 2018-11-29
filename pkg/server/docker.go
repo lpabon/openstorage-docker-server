@@ -102,17 +102,15 @@ func (d *driver) volNotMounted(request string, id string) error {
 func (d *driver) Routes() []*Route {
 	return []*Route{
 		{verb: "POST", path: volDriverPath("Create"), fn: d.create},
-		/*
-			{verb: "POST", path: volDriverPath("Remove"), fn: d.remove},
-			{verb: "POST", path: volDriverPath("Mount"), fn: d.mount},
-			{verb: "POST", path: volDriverPath("Path"), fn: d.path},
-			{verb: "POST", path: volDriverPath("List"), fn: d.list},
-			{verb: "POST", path: volDriverPath("Get"), fn: d.get},
-			{verb: "POST", path: volDriverPath("Unmount"), fn: d.unmount},
-			{verb: "POST", path: volDriverPath("Capabilities"), fn: d.capabilities},
-			{verb: "POST", path: "/Plugin.Activate", fn: d.handshake},
-			{verb: "GET", path: "/status", fn: d.status},
-		*/
+		//{verb: "POST", path: volDriverPath("Remove"), fn: d.remove},
+		//{verb: "POST", path: volDriverPath("Mount"), fn: d.mount},
+		//{verb: "POST", path: volDriverPath("Path"), fn: d.path},
+		//{verb: "POST", path: volDriverPath("List"), fn: d.list},
+		//{verb: "POST", path: volDriverPath("Get"), fn: d.get},
+		//{verb: "POST", path: volDriverPath("Unmount"), fn: d.unmount},
+		//{verb: "POST", path: volDriverPath("Capabilities"), fn: d.capabilities},
+		{verb: "POST", path: "/Plugin.Activate", fn: d.handshake},
+		//{verb: "GET", path: "/status", fn: d.status},
 	}
 }
 
@@ -209,6 +207,7 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	fmt.Println("Got request", request)
 
 	// Get the token and place it in the context
 	token, tokenInName := d.GetTokenFromString(request.Name)
@@ -219,6 +218,7 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 		"authorization": "bearer " + token,
 	})
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
+	fmt.Println("Got token")
 
 	// get grpc connection
 	conn, err := d.getConn()
@@ -226,6 +226,7 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 		d.errorResponse(method, w, err)
 		return
 	}
+	fmt.Println("Got grpc connection")
 
 	spec.VolumeLabels = locator.VolumeLabels
 	volumes := api.NewOpenStorageVolumeClient(conn)
