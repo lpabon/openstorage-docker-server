@@ -5,18 +5,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"path"
 
 	"context"
+
 	"github.com/libopenstorage/openstorage/pkg/grpcserver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
 	"github.com/libopenstorage/openstorage/api"
 	"github.com/libopenstorage/openstorage/api/spec"
-	"github.com/libopenstorage/openstorage/config"
-	"github.com/libopenstorage/openstorage/pkg/options"
 	"github.com/libopenstorage/openstorage/pkg/util"
 	"github.com/libopenstorage/openstorage/volume"
 	"github.com/libopenstorage/openstorage/volume/drivers"
@@ -72,13 +70,17 @@ type capabilitiesResponse struct {
 	Capabilities capabilities
 }
 
-func NewVolumePlugin(name, sdkUds string) restServer {
+func newVolumePlugin(name, sdkUds string) restServer {
 	d := &driver{
 		restBase:    restBase{name: name, version: "0.3"},
 		SpecHandler: spec.NewSpecHandler(),
 		sdkUds:      sdkUds,
 	}
 	return d
+}
+
+func volDriverPath(method string) string {
+	return fmt.Sprintf("/%s.%s", VolumeDriver, method)
 }
 
 func (d *driver) volNotFound(request string, id string, e error, w http.ResponseWriter) error {
