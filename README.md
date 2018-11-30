@@ -7,7 +7,21 @@ Research microservice
 
 We want:
 
-* program starts listenting on a UDS for the Docker REST server. This is in openstorage StartVolumePluginAPI in
+[x] program starts listenting on a UDS for the Docker REST server. This is in openstorage StartVolumePluginAPI in
   api/server/server.go. This is started by StartPluginAPI() in cmd/osd/main.go.
-* Connect to unix domain socket for SDK. In cmd/osd/main.go check out sdksocket.
-* Test using the demo in OpenStorage.
+[x] Connect to unix domain socket for SDK. In cmd/osd/main.go check out sdksocket.
+[x] Test using the demo in OpenStorage.
+[x] Flag for sdk endpoint
+[ ] Support for the following commands
+  [x] create
+  [ ] delete (can get ID from name using SDK call)
+  [ ] mount
+  [ ] attach
+  [ ] detach
+  [ ] unmount
+
+
+Architecture:
+
+![](arch.jpg)
+

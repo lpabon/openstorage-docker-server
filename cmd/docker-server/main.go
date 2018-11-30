@@ -1,28 +1,29 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"os"
 
 	"github.com/libopenstorage/openstorage/volume"
 	"github.com/lpabon/openstorage-docker-server/pkg/server"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	d := "fake"
 	mgmtPort := 2376
 	pluginPort := 2377
+	e := flag.String("e", "localhost:9100", "Endpoint for sdksocket")
 
-	//sdksocket := fmt.Sprintf("/var/lib/osd/driver/%s-sdk.sock", d)
-	sdksocket := "localhost:9100"
+	logrus.Info("Starting docker server with OSD endpoint " + *e)
 	if err := server.StartPluginAPI(
-		d, sdksocket,
+		d, *e,
 		volume.DriverAPIBase,
 		volume.PluginAPIBase,
 		uint16(mgmtPort),
 		uint16(pluginPort),
 	); err != nil {
-		fmt.Println("Failed to start server")
+		logrus.Error("Failed to start server")
 		os.Exit(1)
 	}
 
