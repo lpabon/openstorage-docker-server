@@ -9,11 +9,12 @@ import (
 )
 
 func main() {
-	d := "fake2"
+	d := "fake"
 	mgmtPort := 2376
 	pluginPort := 2377
 
-	sdksocket := fmt.Sprintf("/var/lib/osd/driver/%s-sdk.sock", d)
+	//sdksocket := fmt.Sprintf("/var/lib/osd/driver/%s-sdk.sock", d)
+	sdksocket := "localhost:9100"
 	if err := server.StartPluginAPI(
 		d, sdksocket,
 		volume.DriverAPIBase,

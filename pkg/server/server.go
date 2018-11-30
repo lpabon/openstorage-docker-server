@@ -51,13 +51,13 @@ func StartPluginAPI(
 	mgmtPort uint16,
 	pluginPort uint16,
 ) error {
-	if err := StartVolumeMgmtAPI(
+	/*if err := StartVolumeMgmtAPI(
 		name,
 		mgmtBase,
 		mgmtPort,
 	); err != nil {
 		return err
-	}
+	}*/
 	if err := StartVolumePluginAPI(
 		name, sdkUds,
 		pluginBase,
