@@ -207,7 +207,6 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	fmt.Println("Got request", request)
 
 	// Get the token and place it in the context
 	token, tokenInName := d.GetTokenFromString(request.Name)
@@ -218,7 +217,6 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 		"authorization": "bearer " + token,
 	})
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
-	fmt.Println("Got token")
 
 	// get grpc connection
 	conn, err := d.getConn()
@@ -226,7 +224,6 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 		d.errorResponse(method, w, err)
 		return
 	}
-	fmt.Println("Got grpc connection")
 
 	spec.VolumeLabels = locator.VolumeLabels
 	volumes := api.NewOpenStorageVolumeClient(conn)

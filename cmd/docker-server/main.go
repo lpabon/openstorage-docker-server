@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	pluginName = "docker-server-gateway"
+	pluginName = "docker-gateway"
+	driverName = "fake"
 	mgmtPort   = 2376
 	pluginPort = 2377
 )
@@ -25,9 +26,9 @@ func init() {
 }
 
 func main() {
-	logrus.Info("Starting docker server with OSD endpoint " + endpoint)
+	logrus.Infof("Starting docker gateway with osd sdk: %s", endpoint)
 	if err := server.StartPluginAPI(
-		pluginName, endpoint,
+		pluginName, driverName, endpoint,
 		volume.DriverAPIBase,
 		volume.PluginAPIBase,
 		uint16(mgmtPort),
