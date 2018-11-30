@@ -248,49 +248,48 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*
-		// If we fail to find the volume, create it.
-		if _, err = d.volFromName(name); err != nil {
-			v, err := volumedrivers.Get(d.name)
+	// If we fail to find the volume, create it.
+	if _, err = d.volFromName(name); err != nil {
+		v, err := volumedrivers.Get(d.name)
+		if err != nil {
+			d.errorResponse(method, w, err)
+			return
+		}
+		if !specParsed {
+			spec, locator, source, err = d.SpecFromOpts(request.Opts)
 			if err != nil {
 				d.errorResponse(method, w, err)
 				return
 			}
-			if !specParsed {
-				spec, locator, source, err = d.SpecFromOpts(request.Opts)
-				if err != nil {
-					d.errorResponse(method, w, err)
-					return
-				}
-			}
-			if locator == nil {
-				locator = &api.VolumeLocator{}
-			}
-			locator.Name = name
-			if source != nil && len(source.Parent) != 0 {
-				vol, err := d.volFromName(source.Parent)
-				if err != nil {
-					d.errorResponse(method, w, err)
-					return
-				}
-				if _, err = v.Snapshot(vol.Id,
-					false,
-					&api.VolumeLocator{Name: name},
-					false,
-				); err != nil {
-					d.errorResponse(method, w, err)
-					return
-				}
-			} else if _, err := v.Create(
-				locator,
-				nil,
-				spec,
-			); err != nil && err != volume.ErrExist {
+		}
+		if locator == nil {
+			locator = &api.VolumeLocator{}
+		}
+		locator.Name = name
+		if source != nil && len(source.Parent) != 0 {
+			vol, err := d.volFromName(source.Parent)
+			if err != nil {
 				d.errorResponse(method, w, err)
 				return
 			}
+			if _, err = v.Snapshot(vol.Id,
+				false,
+				&api.VolumeLocator{Name: name},
+				false,
+			); err != nil {
+				d.errorResponse(method, w, err)
+				return
+			}
+		} else if _, err := v.Create(
+			locator,
+			nil,
+			spec,
+		); err != nil && err != volume.ErrExist {
+			d.errorResponse(method, w, err)
+			return
 		}
-	*/
+	}
+
 	json.NewEncoder(w).Encode(&volumeResponse{})
 }
 

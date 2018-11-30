@@ -9,21 +9,31 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func main() {
-	d := "fake"
-	mgmtPort := 2376
-	pluginPort := 2377
-	e := flag.String("e", "localhost:9100", "Endpoint for sdksocket")
+const (
+	pluginName = "docker-server-gateway"
+	mgmtPort   = 2376
+	pluginPort = 2377
+)
 
-	logrus.Info("Starting docker server with OSD endpoint " + *e)
+var (
+	endpoint string
+)
+
+func init() {
+	flag.StringVar(&endpoint, "e", "localhost:9100", "Endpoint for sdksocket")
+	flag.Parse()
+}
+
+func main() {
+	logrus.Info("Starting docker server with OSD endpoint " + endpoint)
 	if err := server.StartPluginAPI(
-		d, *e,
+		pluginName, endpoint,
 		volume.DriverAPIBase,
 		volume.PluginAPIBase,
 		uint16(mgmtPort),
 		uint16(pluginPort),
 	); err != nil {
-		logrus.Error("Failed to start server")
+		logrus.Errorf("Failed to start server: %s", err)
 		os.Exit(1)
 	}
 
