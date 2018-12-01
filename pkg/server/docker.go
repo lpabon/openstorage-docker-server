@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path"
 
 	"context"
 
+	"github.com/libopenstorage/openstorage/config"
 	"github.com/libopenstorage/openstorage/pkg/grpcserver"
+	"github.com/libopenstorage/openstorage/pkg/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
@@ -102,11 +105,11 @@ func (d *driver) volNotMounted(request string, id string) error {
 func (d *driver) Routes() []*Route {
 	return []*Route{
 		{verb: "POST", path: volDriverPath("Create"), fn: d.create},
-		//{verb: "POST", path: volDriverPath("Remove"), fn: d.remove},
+		{verb: "POST", path: volDriverPath("Remove"), fn: d.remove},
 		//{verb: "POST", path: volDriverPath("Mount"), fn: d.mount},
 		//{verb: "POST", path: volDriverPath("Path"), fn: d.path},
 		//{verb: "POST", path: volDriverPath("List"), fn: d.list},
-		//{verb: "POST", path: volDriverPath("Get"), fn: d.get},
+		{verb: "POST", path: volDriverPath("Get"), fn: d.get},
 		//{verb: "POST", path: volDriverPath("Unmount"), fn: d.unmount},
 		//{verb: "POST", path: volDriverPath("Capabilities"), fn: d.capabilities},
 		{verb: "POST", path: "/Plugin.Activate", fn: d.handshake},
@@ -196,6 +199,7 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	fmt.Println("Create request received:", request)
 
 	specParsed, spec, locator, source, name := d.SpecFromString(request.Name)
 	d.logRequest(method, name).Infoln("")
@@ -290,27 +294,28 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&volumeResponse{})
 }
 
-/*
 func (d *driver) remove(w http.ResponseWriter, r *http.Request) {
 	method := "remove"
 	request, err := d.decode(method, w, r)
 	if err != nil {
 		return
 	}
+	fmt.Println("Delete request received", request)
 
-	v, err := volumedrivers.Get(d.name)
-	if err != nil {
-		d.logRequest(method, "").Warnf("Cannot locate volume driver")
-		d.errorResponse(method, w, err)
-		return
-	}
+	/*
+			v, err := volumedrivers.Get(d.name)
+			if err != nil {
+				d.logRequest(method, "").Warnf("Cannot locate volume driver")
+				d.errorResponse(method, w, err)
+				return
+			}
 
-	_, _, _, _, name := d.SpecFromString(request.Name)
+		_, _, _, _, name := d.SpecFromString(request.Name)
+		if err = v.Delete(name); err != nil {
+			d.errorResponse(method, w, err)
+			return
+		}*/
 
-	if err = v.Delete(name); err != nil {
-		d.errorResponse(method, w, err)
-		return
-	}
 	json.NewEncoder(w).Encode(&volumeResponse{})
 }
 
@@ -618,17 +623,17 @@ func (d *driver) get(w http.ResponseWriter, r *http.Request) {
 	} else {
 		returnName = name
 	}
-	vol, err := d.volFromName(name)
+	/*vol, err := d.volFromName(name)
 	if err != nil {
 		e := d.volNotFound(method, request.Name, err, w)
 		d.errorResponse(method, w, e)
 		return
-	}
+	}*/
 
 	volInfo := volumeInfo{Name: returnName}
-	if len(vol.AttachPath) > 0 || len(vol.AttachPath) > 0 {
+	/*if len(vol.AttachPath) > 0 || len(vol.AttachPath) > 0 {
 		volInfo.Mountpoint = path.Join(vol.AttachPath[0], config.DataDir)
-	}
+	}*/
 
 	json.NewEncoder(w).Encode(map[string]volumeInfo{"Volume": volInfo})
 }
@@ -699,4 +704,3 @@ func (d *driver) capabilities(w http.ResponseWriter, r *http.Request) {
 	d.logRequest(method, "").Infof("response %v", response.Capabilities.Scope)
 	json.NewEncoder(w).Encode(&response)
 }
-*/

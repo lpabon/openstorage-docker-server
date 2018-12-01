@@ -91,7 +91,6 @@ func StartVolumePluginAPI(
 	pluginBase string,
 	pluginPort uint16,
 ) error {
-
 	volPluginApi := newVolumePlugin(driverName, sdkUds)
 	if err := startServer(
 		pluginName,
@@ -101,6 +100,20 @@ func StartVolumePluginAPI(
 	); err != nil {
 		return err
 	}
+	/*
+		if err := manager.Init(config.ClusterConfig{}); err != nil {
+			return err
+		}
+
+		params := make(map[string]string)
+		if err := volumedrivers.Register(driverName, params); err != nil {
+			return fmt.Errorf("Unable to start volume driver: %v, %v", driverName, err)
+		}
+
+		if err := volumedrivers.Register("fake", nil); err != nil {
+			return err
+		}*/
+
 	return nil
 }
 
