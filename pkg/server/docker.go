@@ -249,48 +249,6 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// If we fail to find the volume, create it.
-	if _, err = d.volFromName(name); err != nil {
-		v, err := volumedrivers.Get(d.name)
-		if err != nil {
-			d.errorResponse(method, w, err)
-			return
-		}
-		if !specParsed {
-			spec, locator, source, err = d.SpecFromOpts(request.Opts)
-			if err != nil {
-				d.errorResponse(method, w, err)
-				return
-			}
-		}
-		if locator == nil {
-			locator = &api.VolumeLocator{}
-		}
-		locator.Name = name
-		if source != nil && len(source.Parent) != 0 {
-			vol, err := d.volFromName(source.Parent)
-			if err != nil {
-				d.errorResponse(method, w, err)
-				return
-			}
-			if _, err = v.Snapshot(vol.Id,
-				false,
-				&api.VolumeLocator{Name: name},
-				false,
-			); err != nil {
-				d.errorResponse(method, w, err)
-				return
-			}
-		} else if _, err := v.Create(
-			locator,
-			nil,
-			spec,
-		); err != nil && err != volume.ErrExist {
-			d.errorResponse(method, w, err)
-			return
-		}
-	}
-
 	json.NewEncoder(w).Encode(&volumeResponse{})
 }
 
@@ -302,19 +260,55 @@ func (d *driver) remove(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("Delete request received", request)
 
-	/*
-			v, err := volumedrivers.Get(d.name)
-			if err != nil {
-				d.logRequest(method, "").Warnf("Cannot locate volume driver")
-				d.errorResponse(method, w, err)
-				return
-			}
+	specParsed, _, locator, _, name := d.SpecFromString(request.Name)
+	d.logRequest(method, name).Infoln("")
+	fmt.Println("spec parsed:", "name", name, "locator", locator)
 
-		_, _, _, _, name := d.SpecFromString(request.Name)
-		if err = v.Delete(name); err != nil {
+	if !specParsed {
+		_, _, _, err = d.SpecFromOpts(request.Opts)
+		if err != nil {
 			d.errorResponse(method, w, err)
 			return
-		}*/
+		}
+	}
+
+	// Get the token and place it in the context
+	token, tokenInName := d.GetTokenFromString(request.Name)
+	if !tokenInName {
+		token = request.Opts[api.Token]
+	}
+	md := metadata.New(map[string]string{
+		"authorization": "bearer " + token,
+	})
+	ctx := metadata.NewOutgoingContext(context.Background(), md)
+
+	// get grpc connection
+	conn, err := d.getConn()
+	if err != nil {
+		d.errorResponse(method, w, err)
+		return
+	}
+	volumes := api.NewOpenStorageVolumeClient(conn)
+
+	// get id to deletes
+	resp, err := volumes.EnumerateWithFilters(ctx, &api.SdkVolumeEnumerateWithFiltersRequest{
+		//Locator: locator,
+		Locator: &api.VolumeLocator{
+			Name: name,
+		},
+	})
+	fmt.Println("resp", resp)
+	fmt.Println("resp", resp.VolumeIds)
+
+	// delete volume
+	// TODO handle vol ids empty or >1
+	_, err = volumes.Delete(ctx, &api.SdkVolumeDeleteRequest{
+		VolumeId: resp.VolumeIds[0],
+	})
+	if err != nil {
+		d.errorResponse(method, w, err)
+		return
+	}
 
 	json.NewEncoder(w).Encode(&volumeResponse{})
 }
