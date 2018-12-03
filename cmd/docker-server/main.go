@@ -24,10 +24,11 @@ func init() {
 	flag.StringVar(&endpoint, "e", "localhost:9100", "Endpoint for sdksocket")
 	flag.StringVar(&pluginName, "p", "osd-gateway", "Name for our plugin")
 	flag.StringVar(&driverName, "d", "fake", "Driver we want to use")
-	flag.Parse()
 }
 
 func main() {
+	flag.Parse()
+
 	logrus.Infof("Starting %s with osd sdk: %s (%s driver)", pluginName, endpoint, driverName)
 	if err := server.StartPluginAPI(
 		pluginName, driverName, endpoint,

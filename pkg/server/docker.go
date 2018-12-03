@@ -195,6 +195,7 @@ func (d *driver) getConn() (*grpc.ClientConn, error) {
 
 func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 	method := "create"
+	fmt.Printf("start %v", *r)
 	request, err := d.decode(method, w, r)
 	if err != nil {
 		return
@@ -239,10 +240,16 @@ func (d *driver) create(w http.ResponseWriter, r *http.Request) {
 		})
 	} else {
 		// create
-		_, err = volumes.Create(ctx, &api.SdkVolumeCreateRequest{
+		resp, err := volumes.Create(ctx, &api.SdkVolumeCreateRequest{
 			Name: name,
 			Spec: spec,
 		})
+		if err != nil {
+			d.errorResponse(method, w, err)
+			return
+		}
+
+		fmt.Println(resp.GetVolumeId())
 	}
 	if err != nil {
 		d.errorResponse(method, w, err)
@@ -291,12 +298,18 @@ func (d *driver) remove(w http.ResponseWriter, r *http.Request) {
 	volumes := api.NewOpenStorageVolumeClient(conn)
 
 	// get id to deletes
+	fmt.Println("***NAME", name)
+	fmt.Println("***locator", locator)
 	resp, err := volumes.EnumerateWithFilters(ctx, &api.SdkVolumeEnumerateWithFiltersRequest{
 		//Locator: locator,
 		Locator: &api.VolumeLocator{
 			Name: name,
 		},
 	})
+	if err != nil {
+		d.errorResponse(method, w, err)
+		return
+	}
 	fmt.Println("resp", resp)
 	fmt.Println("resp", resp.VolumeIds)
 
