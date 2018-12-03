@@ -109,7 +109,7 @@ func (d *driver) Routes() []*Route {
 		//{verb: "POST", path: volDriverPath("Mount"), fn: d.mount},
 		//{verb: "POST", path: volDriverPath("Path"), fn: d.path},
 		//{verb: "POST", path: volDriverPath("List"), fn: d.list},
-		{verb: "POST", path: volDriverPath("Get"), fn: d.get},
+		//{verb: "POST", path: volDriverPath("Get"), fn: d.get},
 		//{verb: "POST", path: volDriverPath("Unmount"), fn: d.unmount},
 		//{verb: "POST", path: volDriverPath("Capabilities"), fn: d.capabilities},
 		{verb: "POST", path: "/Plugin.Activate", fn: d.handshake},
